@@ -23,6 +23,47 @@ export default function initRephraseChain(llm: BaseChatModel) {
   // const rephraseQuestionChainPrompt = PromptTemplate.fromTemplate<RephraseQuestionInput, string>(...)
   // TODO: Create Runnable Sequence
   // return RunnableSequence.from<RephraseQuestionInput, string>(
+
+  // Prompt template
+  const rephraseQuestionChainPrompt = PromptTemplate.fromTemplate<RephraseQuestionInput, string>(`
+      Given the following conversation and a question,
+      rephrase the follow-up question to be a standalone question about the
+      subject of the conversation history.
+
+      If you do not have the required information required to construct
+      a standalone question, ask for clarification.
+
+      Always include the subject of the history in the question.
+
+      History:
+      {history}
+
+      Question:
+      {input}
+      `);
+    
+      return RunnableSequence.from<RephraseQuestionInput, string>([
+        // <1> Convert message history to a string
+        RunnablePassthrough.assign({
+          history: ({ history }): string => {
+            if (history.length == 0) {
+              return "No history";
+            }
+            return history
+              .map(
+                (response: ChatbotResponse) =>
+                  `Human: ${response.input}\nAI: ${response.output}`
+              )
+              .join("\n");
+          },
+        }),
+        // <2> Use the input and formatted history to format the prompt
+        rephraseQuestionChainPrompt,
+        // <3> Pass the formatted prompt to the LLM
+        llm,
+        // <4> Coerce the output into a string
+        new StringOutputParser(),
+      ]);
 }
 // end::function[]
 

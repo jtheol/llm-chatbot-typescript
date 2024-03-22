@@ -15,5 +15,29 @@ export default async function initVectorStore(
   // TODO: Create vector store
   // const vectorStore = await Neo4jVectorStore.fromExistingIndex(embeddings, { ... })
   // return vectorStore
+
+  const vectorStore = await Neo4jVectorStore.fromExistingIndex(embeddings, {
+    url: process.env.NEO4J_URI as string,
+    username: process.env.NEO4J_USERNAME as string,
+    password: process.env.NEO4J_PASSWORD as string,
+    indexName: "moviePlots",
+    textNodeProperty: "plot",
+    embeddingNodeProperty: "embedding",
+    retrievalQuery: `
+      RETURN
+        node.plot AS text,
+        score,
+        {
+          _id: elementid(node),
+          title: node.title,
+          directors: [ (person)-[:DIRECTED]->(node) | person.name ],
+          actors: [ (person)-[r:ACTED_IN]->(node) | [person.name, r.role] ],
+          tmdbId: node.tmdbId,
+          source: 'https://www.themoviedb.org/movie/'+ node.tmdbId
+        } AS metadata
+    `,
+  });
+
+  return vectorStore
 }
 // end::function[]

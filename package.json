@@ -21,9 +21,9 @@
     "iron-session": "^8.0.1",
     "langchain": "^0.1.28",
     "marked": "^10.0.0",
-    "neo4j-driver": "^5.14.0",
-    "next": "14.0.2",
-    "openai": "^4.20.0",
+    "neo4j-driver": "^5.18.0",
+    "next": "^14.0.2",
+    "openai": "^4.29.2",
     "react": "^18",
     "react-dom": "^18"
   },
